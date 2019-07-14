@@ -1,0 +1,5 @@
+Mem fisica
+tamProcesso
+tam pagina
+processo
+endreços de buscamento
