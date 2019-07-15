@@ -22,12 +22,13 @@ fun main() {
     }
 
     var file = File()
-    var fileEntry = file.processFilter("C:\\Users\\mvtorres\\Desktop\\SimuladorReplacePage - Mateus Torres e Thiago Alexsander\\src\\file.txt")
+    var fileEntry = file.processFilter("src\\file.txt")
 
 
 
     numFrames = fileEntry[0].toInt()/fileEntry[2].toInt()
     numPagina = fileEntry[1].toInt()/fileEntry[2].toInt()
+    numPagina = 5
     println("numero frame $numFrames  numero Pagina $numPagina")
     var frame = Memory(numFrames)
     var table = TablePage(numPagina, frame)
