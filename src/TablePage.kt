@@ -1,53 +1,51 @@
 import java.util.*
 
 class TablePage(private val numPagina:Int, var  memory: Memory){
-    private var pageFault = 0
-    private var listPage = mutableListOf<Page>()
+    private var pageFault = 0 //Numero de pagefault
+    private var listPage = mutableListOf<Page>() //tabela de paginas
     private var replacePageAlth = 0  // qual algoritimo
-    private var fifoList = LinkedList<Page>()
-    private var secondChanceList = LinkedList<Page>()
+    private var fifoList = LinkedList<Page>() //lista do fifo
+    private var secondChanceList = LinkedList<Page>() //lista second chance
     private  var priorityQueue = PriorityQueue<Page>(20){ a, b -> a.pageAge + b.pageAge}
     private var prioritySecondChance = PriorityQueue<Page>(20){ a, b -> a.secondChance +  b.secondChance}
 
 
-   fun startTable(){
+   fun startTable(){ //inicializa a tabela
         var iterator = 0
 
-        memory.startFrame()
+        memory.startFrame()//start o frame
         for (j in iterator until numPagina){
-            listPage.add(Page(j,Integer.toBinaryString(j),-1))
+            listPage.add(Page(j,Integer.toBinaryString(j),-1))//inicializa a tabela de paginas com paginas vazias
         }
    }
 
-    fun isListPageFull():Boolean{
+    private  fun isListPageFull():Boolean{ // se a tabela de paginas esta vazia
         listPage.forEach { if(it.pageFisica == -1 ) return false}
-
         return true
     }
 
-    fun cleanTable(){
+    fun cleanTable(){//limpa tabela de paginas
         var k = 0
 
         for(j in k until numPagina){
             listPage[j].pageFisica =-1
         }
-
     }
 
-    fun printTable(){ listPage.forEach {it.printPage() }  }
-    //find page precisa achar o end fisico certo e nao o end logico ou se nao estiver na
+    fun printTable(){ listPage.forEach {it.printPage() }  } //printa a tabela
 
+    //Procura a pagina
     private fun findPage(pageFisica:String):Int{ // acha a pagina : Dado o end logico da pagina devolve o end fisico da memoria
         //6 println("fidePAge $pageFisica")
         listPage.forEach { if ((Integer.toBinaryString(it.pageFisica) == pageFisica)){ // talvez if pagefisica == pageFisica
-//            println("HITzao itz $it.pageFisica  bite $pageFisica")
+            println("HIT ${it.pagePosix}  bite $pageFisica")
             it.pageAge++
-
             it.secondChance = 1
 
             prioritySecondChance.add(it)
             priorityQueue.add(it)
-            //printTable()
+            printTable()
+            println()
             return it.pageFisica
         } }// procura a pagina
 
@@ -73,7 +71,9 @@ class TablePage(private val numPagina:Int, var  memory: Memory){
 
     }
     private fun findFramePageFault(FrameFisico:String):Frame{// acha o frame na memoria se deu page fault
-       // println("page no found $FrameFisico")
+       println("page not found $FrameFisico")
+        printTable()
+        println()
         //pageFault++
         memory.frameinho.forEach { if(FrameFisico == it.frameFisico){
 //            println(it.frameFisico + it.data)
@@ -90,9 +90,10 @@ class TablePage(private val numPagina:Int, var  memory: Memory){
         if(bit == -1){// procura na tabela de paginas
             //printTable()
             //println("procurnado no frmame $bitentry")
-            pageFault++
+             pageFault++
 
             if (!isListPageFull()){
+
                 when (replacePageAlth){
                     1 ->  fifo( findFramePageFault(bitentry),fifoList)
                     2 -> leastRUsed(findFramePageFault(bitentry))
@@ -101,6 +102,7 @@ class TablePage(private val numPagina:Int, var  memory: Memory){
 
 
             }else{
+
                 findFramePageFault(bitentry)
             }
 
@@ -155,7 +157,6 @@ class TablePage(private val numPagina:Int, var  memory: Memory){
 
     private fun fifo(frame: Frame,list:LinkedList<Page>){
         listPage.forEach { if (it == list.first){
-
             //removePage(it.pagePosix)
             listPage[it.pagePosix].pageAge = 0
             listPage[it.pagePosix].pageFisica = frame.framePosix
@@ -207,10 +208,7 @@ class TablePage(private val numPagina:Int, var  memory: Memory){
             }
             }
 
-
-        fifo(frame,fifoList)
-//
-
+        fifo(frame,fifoList)//
     }
 
     fun printPageFault(){    println("Page fault total : $pageFault")      }
@@ -218,6 +216,7 @@ class TablePage(private val numPagina:Int, var  memory: Memory){
     fun findProcess(process: MutableList<String>,algth:Int){
         replacePageAlth = algth
         process.forEach { find(it) }
+         if (algth == 1) pageFault++
     }
 
 
